@@ -5,8 +5,8 @@ written consent of DigiPen Institute of Technology is prohibited.
 
 File Name: Heap.hpp
 Project: Lab 8 - Heaps
-Author: 
-Creation date: 
+Author: Sunghwan Cho
+Creation date: 05/18/2021
 ******************************************************************/
 
 #pragma once
@@ -19,36 +19,43 @@ Creation date:
 template <class T>
 Heap<T>::Heap(bool(*compareFunc)(const T& a, const T& b))
 {
+	
 }
 
 template <class T>
 Heap<T>::Heap(T* items, int numOfItems, bool(*compareFunc)(const T& a, const T& b))
 {
+	
 }
 
 template <class T>
 void Heap<T>::Push(T newItem)
 {
+	
 }
 
 template <class T>
 T Heap<T>::Pop()
 {
+	
 }
 
 template <class T>
 bool Heap<T>::IsEmpty()
 {
+	
 }
 
 template <class T>
 void Heap<T>::Sort()
 {
+	
 }
 
 template <class T>
 void Heap<T>::Update(typename std::vector<T>::iterator)
 {
+	
 }
 
 template<class T>

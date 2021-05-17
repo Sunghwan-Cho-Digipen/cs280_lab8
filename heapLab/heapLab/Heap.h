@@ -5,8 +5,8 @@ written consent of DigiPen Institute of Technology is prohibited.
 
 File Name: Heap.h
 Project: Lab 8 - Heaps
-Author: 
-Creation date: 
+Author: Kevin wright
+Creation date: 05/18/2021
 ******************************************************************/
 
 #pragma once
@@ -36,8 +36,5 @@ private:
 	bool(*compareFunc)(const T& a, const T& b);
 	std::vector<T> data;
 };
-
-
-
 
 #include "Heap.hpp"
