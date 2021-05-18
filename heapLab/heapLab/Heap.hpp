@@ -72,6 +72,11 @@ void Heap<T>::Push(T newItem)
 template <class T>
 T Heap<T>::Pop()
 {
+	if(data.size() <= 0)
+	{
+		throw HeapException("No data inside");
+	}
+	
 	T returnValue = data.front();
 	std::swap(data.front(), data.back());
 	data.pop_back();
@@ -129,10 +134,10 @@ void Heap<T>::Update(typename std::vector<T>::iterator iter)
 }
 
 template <class T>
-void Heap<T>::downwardHeapify(typename std::vector<T>::iterator iter, unsigned Index)
+void Heap<T>::downwardHeapify(typename std::vector<T>::iterator iter, unsigned Index) // downwardHeapify Parent->Child
 {
-	unsigned currentLocation = static_cast<unsigned>(iter - data.begin() - Index);	// I don't know why but It didn't worked as 
-																					// I run in for loop, while(iter-- != data.begin()), etc....
+	unsigned currentLocation = static_cast<unsigned>(iter - data.begin() - Index);	// 
+																					// 
 	unsigned LeftChildIndex = ((currentLocation + 1) << 1) - 1;						// 
 	unsigned RightChildIndex = LeftChildIndex + 1;									// 
 																					// 
@@ -200,7 +205,8 @@ void Heap<T>::upperHeapify(typename std::vector<T>::iterator iter) // This is fo
 template <class T>
 void Heap<T>::sortHelperFunction(int index)
 {
-	// I need to go through the Heapify recursively so I should do like this. I can't find out more better way about how can I go through...
+	// I need to go through the Heapify recursively so I should do like this.
+	// I can't find out more better way about how can I go through...
 	// Just following the sort algorithm that prof. kevin showed.
 	if ((index + 1) >= static_cast<int>(data.size()))
 	{
@@ -220,12 +226,6 @@ void Heap<T>::sortHelperFunction(int index)
 	}																					//
 																						//
 	sortHelperFunction(index + 1); 
-}
-
-template <class T>
-void Heap<T>::updateHelper()
-{
-	
 }
 
 template<class T>

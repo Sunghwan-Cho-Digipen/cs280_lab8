@@ -41,7 +41,6 @@ private:
 	void downwardHeapify(typename std::vector<T>::iterator iter, unsigned Index = 0);
 	void upperHeapify(typename std::vector<T>::iterator iter);
 	void sortHelperFunction(int index);
-	void updateHelper();
 	bool(*compareFunc)(const T& a, const T& b);
 	std::vector<T> data;
 };
