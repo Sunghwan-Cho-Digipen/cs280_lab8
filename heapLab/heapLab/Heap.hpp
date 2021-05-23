@@ -26,80 +26,38 @@ template <class T>
 Heap<T>::Heap(T* items, int numOfItems, bool(*compareFunc)(const T& a, const T& b))
 	: compareFunc(compareFunc)
 {
-	for (int i = 0; i < numOfItems; i++)
+	data.reserve(numOfItems);//pre make 
+
+	for (int i = 0; i < numOfItems; ++i)
 	{
-		data.emplace_back(*(items + i));
+		data.push_back(items[i]);
 	}
 
-	const unsigned firstParentIndex = static_cast<unsigned>((data.size() / 2) - 1);	// I don't know why but It didn't worked as 
-	typename std::vector<T>::iterator iter = data.begin() + firstParentIndex;		// I run in for loop, while(iter-- != data.begin()), etc....
-	while (true)																	//
-	{																				//
-		Update(iter);																//
-		if (iter == data.begin())													//
-		{																			//
-			break;																	//
-		}																			//
-		--iter;																		//
-	}																				//
-
+	BuildHeap();
 }
 
 template <class T>
 void Heap<T>::Push(T newItem)
 {
-	data.emplace_back(newItem);
+	data.push_back(newItem);
 	std::cout << "Push:\t" << *this << std::endl;
-
-	if (data.size() < 2)
-	{
-		return;
-	}
-	
-	const unsigned firstParentIndex = static_cast<unsigned>((data.size() / 2) - 1);	// I don't know why but It didn't worked as 
-	typename std::vector<T>::iterator iter = data.begin() + firstParentIndex;		// I run in for loop, while(iter-- != data.begin()), etc....
-	while (true)																	//
-	{																				//
-		Update(iter);																//
-		if (iter == data.begin())													//
-		{																			//
-			break;																	//
-		}																			//
-		--iter;																		//
-	}																				//
+	const int LastIndex = data.size() - 1;
+	HeapifyUp(LastIndex, data.begin(), data.end());
 }
 
 template <class T>
 T Heap<T>::Pop()
 {
-	if(data.size() <= 0)
-	{
-		throw HeapException("No data inside");
-	}
-	
-	T returnValue = data.front();
-	std::swap(data.front(), data.back());
+	T firstElement = data.front();
+	*data.begin() = *(data.end() - 1);
+
 	data.pop_back();
+
 	std::cout << "Pop:\t" << *this << std::endl;
 
-	if (data.size() < 2)
-	{
-		return returnValue;
-	}
-	
-	const unsigned firstParentIndex = static_cast<unsigned>((data.size() / 2) - 1);	// I don't know why but It didn't worked as 
-	typename std::vector<T>::iterator iter = data.begin() + firstParentIndex;		// I run in for loop, while(iter-- != data.begin()), etc....
-	while (true)																	//
-	{																				//
-		Update(iter);																//
-		if (iter == data.begin())													//
-		{																			//
-			break;																	//
-		}																			//
-		--iter;																		//
-	}																				//
+	HeapifyDown(0, data.begin(), data.end());
 
-	return returnValue;
+	return firstElement;
 }
 
 template <class T>
@@ -111,129 +69,133 @@ bool Heap<T>::IsEmpty()
 template <class T>
 void Heap<T>::Sort()
 {
-	if(data.size() < 2)
+	const int DataSize = data.size();
+	for (int i = 1; i < DataSize; ++i)
 	{
-		return;
+		for (int parent = GetParentIndex(DataSize - i - 1); parent >= 0; --parent)
+		{
+			HeapifyDown(parent, data.begin() + i, data.end());
+		}
 	}
-
-	sortHelperFunction(1); // starting from index 1.
 }
 
 template <class T>
 void Heap<T>::Update(typename std::vector<T>::iterator iter)
 {
-	const unsigned currentLocation = static_cast<int>(iter - data.begin());
-	if((currentLocation << 1) + 1 >= data.size()) // Check if it has a child data
+	const int index = iter - data.begin();
+
+	int parent = GetParentIndex(index);
+	if (compareFunc(*iter, data[parent]) == true)//has higher priority than parent so it should go up
 	{
-		upperHeapify(iter);
+		HeapifyUp(index, data.begin(), data.end());
 	}
 	else
 	{
-		downwardHeapify(iter);
+		HeapifyDown(index, data.begin(), data.end());
 	}
 }
 
 template <class T>
-void Heap<T>::downwardHeapify(typename std::vector<T>::iterator iter, unsigned Index) // downwardHeapify Parent->Child
+int Heap<T>::GetParentIndex(int index) const
 {
-	unsigned currentLocation = static_cast<unsigned>(iter - data.begin() - Index);	// 
-																					// 
-	unsigned LeftChildIndex = ((currentLocation + 1) << 1) - 1;						// 
-	unsigned RightChildIndex = LeftChildIndex + 1;									// 
-																					// 
-	const unsigned Size = data.size() - Index;										// I should make downwardHeapify like this to make sure
-																					// that I need to go through typical nodes not going through the
-	if (Size <= LeftChildIndex)														// all of the nodes......
-	{																				//
-		return;																		//
-	}																				//
-																					//
-	bool isSortLogicTrue = false;													//
-																					//
-	if (Size <= RightChildIndex)													//
-	{																				//
-		isSortLogicTrue = true;														//
-	}																				//
-	else																			//
-	{																				//
-		currentLocation += Index;													//
-		LeftChildIndex += Index;													//
-		RightChildIndex += Index;													//
-		isSortLogicTrue = compareFunc(data[LeftChildIndex], data[RightChildIndex]);	//
-	} // I did this if and only if that RightChildIndex == data.size();				
-																					
-	if (isSortLogicTrue == true)													
-	{																				
-		if (compareFunc(data[LeftChildIndex], data[currentLocation]) == true)		
-		{
-			std::swap(data[LeftChildIndex], data[currentLocation]);
-			std::cout << "Swap:\t" << *this << std::endl;
-			downwardHeapify(data.begin() + LeftChildIndex, Index);
-		}
-	}
-	else
+	return (index - 1) / 2;
+}
+
+template <class T>
+int Heap<T>::GetLeftChildIndex(int index) const
+{
+	return index * 2 + 1;
+}
+
+template <class T>
+int Heap<T>::GetRightChildIndex(int index) const
+{
+	return index * 2 + 2;
+}
+
+template <class T>
+void Heap<T>::HeapifyUp(int index, Iter start, Iter end)
+{
+	if (index == 0)
 	{
-		if (compareFunc(data[RightChildIndex], data[currentLocation]) == true)
-		{
-			std::swap(data[RightChildIndex], data[currentLocation]);
-			std::cout << "Swap:\t" << *this << std::endl;
-			downwardHeapify(data.begin() + RightChildIndex, Index);
-		}
+		return;
+	}
+
+	const int ParentIndex = GetParentIndex(index);
+
+	if (compareFunc(*(start + index), *(start + ParentIndex)) == true)
+	{
+		Swap(*(start + index), *(start + ParentIndex));
+		HeapifyUp(ParentIndex, start, end);
 	}
 }
 
 template <class T>
-void Heap<T>::upperHeapify(typename std::vector<T>::iterator iter) // This is for the UpperHeapify..... Child->Parent
+void Heap<T>::HeapifyDown(int index, Iter start, Iter end)
 {
-	const unsigned currentLocation = static_cast<unsigned>(iter - data.begin());
-
-	const unsigned parentIndex = ((currentLocation - 1) >> 1);
-
-	if (currentLocation <= 0)
+	int TempIndex = index;
+	const int LeftIndex = GetLeftChildIndex(index);
+	const int RightIndex = GetRightChildIndex(index);
+	const int DataQuantity = end - start;
+	if (LeftIndex > DataQuantity - 1)
 	{
 		return;
 	}
 	
-	if (compareFunc(data[currentLocation], data[parentIndex]) == true)	
+	if (LeftIndex == DataQuantity - 1)
 	{
-		std::swap(data[parentIndex], data[currentLocation]);
-		std::cout << "Swap:\t" << *this << std::endl;
-		upperHeapify(data.begin() + parentIndex);
+		if (compareFunc(*(start + LeftIndex), *(start + index)) == true)
+		{
+			TempIndex = LeftIndex;
+		}
+	}
+	else 
+	{
+		if (compareFunc(*(start + LeftIndex), *(start + RightIndex)) == true)
+		{
+			if (compareFunc(*(start + LeftIndex), *(start + index)) == true)
+			{
+				TempIndex = LeftIndex;
+			}
+		}
+		else
+		{
+			if (compareFunc(*(start + RightIndex), *(start + index)) == true)
+			{
+				TempIndex = RightIndex;
+			}
+		}
+	}
+
+	if (TempIndex != index)
+	{
+		Swap(*(start + TempIndex), *(start + index));
+		HeapifyDown(TempIndex, start, end);
 	}
 }
 
 template <class T>
-void Heap<T>::sortHelperFunction(int index)
+void Heap<T>::BuildHeap()
 {
-	// I need to go through the Heapify recursively so I should do like this.
-	// I can't find out more better way about how can I go through...
-	// Just following the sort algorithm that prof. kevin showed.
-	if ((index + 1) >= static_cast<int>(data.size()))
+	for (int index = GetParentIndex(data.size() - 1); index >= 0; --index)
 	{
-		return;
+		HeapifyDown(index, data.begin(), data.end());
 	}
-
-	const unsigned firstParentIndex = static_cast<unsigned>(((data.size() - index)) / 2 - 1) ;
-	typename std::vector<T>::iterator iter = (data.begin() + index) + firstParentIndex;	// I don't know why but It didn't worked as 
-	while (true)																		// I run in for loop, while(iter-- != data.begin()), etc....
-	{																					//
-		downwardHeapify(iter, index);													//
-		if (iter == (data.begin() + index))												//
-		{																				//
-			break;																		//
-		}																				//
-		--iter;																			//
-	}																					//
-																						//
-	sortHelperFunction(index + 1); 
 }
+
+template <class T>
+void Heap<T>::Swap(T& a, T& b)
+{
+	std::swap(a, b);
+	std::cout << "Swap:\t" << *this << std::endl;
+}
+
 
 template<class T>
 std::ostream& operator<<(std::ostream& out, Heap<T>& heap)
 {
-	if (heap.data.empty() == false)
-	{
-		for (int i = 0; i < static_cast<int>(heap.data.size()) - 1; i++)
+	if (heap.data.empty() == false) {
+		for (int i = 0; i < static_cast<int>(heap.data.size()) - 1; i++) 
 		{
 			out << std::setw(3) << heap.data[i] << ",  ";
 		}
@@ -245,7 +207,7 @@ std::ostream& operator<<(std::ostream& out, Heap<T>& heap)
 template<>
 std::ostream& operator<<(std::ostream& out, Heap<std::string>& heap)
 {
-	for (unsigned int i = 0; i < heap.data.size() - 1; i++)
+	for (unsigned int i = 0; i < heap.data.size() - 1; i++) 
 	{
 		out << heap.data[i] << ",  ";
 	}
