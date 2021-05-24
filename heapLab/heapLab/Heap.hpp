@@ -26,7 +26,7 @@ template <class T>
 Heap<T>::Heap(T* items, int numOfItems, bool(*compareFunc)(const T& a, const T& b))
 	: compareFunc(compareFunc)
 {
-	data.reserve(numOfItems);//pre make 
+	data.reserve(numOfItems);
 
 	for (int i = 0; i < numOfItems; ++i)
 	{
@@ -85,7 +85,7 @@ void Heap<T>::Update(typename std::vector<T>::iterator iter)
 	const int index = iter - data.begin();
 
 	int parent = GetParentIndex(index);
-	if (compareFunc(*iter, data[parent]) == true)//has higher priority than parent so it should go up
+	if (compareFunc(*iter, data[parent]) == true)
 	{
 		HeapifyUp(index, data.begin(), data.end());
 	}
